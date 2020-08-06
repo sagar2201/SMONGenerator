@@ -88,16 +88,7 @@ function PPTGenerator() {
 			}
 		},
 
-		processDataSet: function () {
-
-			this.init();
-
-			this.setDataPayload();
-
-			this.setMeasuresIndex();
-
-			this.buildEmptyResultSet();
-
+		fillResultSet: function () {
 			// // TODO: Add this back into result set
 			// let sDate = this.aDataSet[0].trim().split(' ')[0];
 
@@ -105,7 +96,6 @@ function PPTGenerator() {
 
 			let aCurrentLine;
 
-			// Start from line 6 // TODO: Make more fool-proof
 			for (let i = this.iMeasuresIndex + 2; i < this.aDataSet.length; i++) {
 
 				// Break the line into several pieces -
@@ -122,7 +112,6 @@ function PPTGenerator() {
 					// Get the JSON Object associated specifically with this measures -
 					let oCurrentMeasure = this.oResultSet[aKnownMeasures[j]];
 
-					// oResultSet[aKnownMeasures[j]][aCurrentLine[iAppServerIndex]]
 					// In that JSON Object is there already info about this app server?
 					if (!oCurrentMeasure[aCurrentLine[this.iAppServerIndex]])
 						oCurrentMeasure[aCurrentLine[this.iAppServerIndex]] = {
@@ -132,64 +121,55 @@ function PPTGenerator() {
 
 					let oCurrentMeasureAppServer = oCurrentMeasure[aCurrentLine[this.iAppServerIndex]];
 					oCurrentMeasureAppServer.TimeStamps.push(aCurrentLine[this.iTimeIndex]);
-					try {
-						sCurrentLineValue = aCurrentLine[oCurrentMeasure.index];
 
-						sCurrentLineValue = parseFloat(sCurrentLineValue.replace(",", ""));
+					sCurrentLineValue = aCurrentLine[oCurrentMeasure.index];
 
-						if (isNaN(sCurrentLineValue)) {
-							debugger;
-							throw new Error("Encountred a value that is not a number")
-						}
-						oCurrentMeasureAppServer.Values.push(sCurrentLineValue);
-					} catch (e) {
-						alert(e);
+					sCurrentLineValue = parseFloat(sCurrentLineValue.replace(",", ""));
+
+					if (isNaN(sCurrentLineValue)) {
 						debugger;
+						throw new Error("Encountred a value that is not a number")
 					}
+
+					oCurrentMeasureAppServer.Values.push(sCurrentLineValue);
 				}
 			}
-			// this.oResultSet.Date = sDate;
 
-			// Data will look like this -
-			// {
-			// 	"UserLogins": {
-			//		"index": 7
-			// 		"AppServer 1":{
-			// 		"time-stamps": [],
-			// 		"values": []
-			// 		},
-			//		"AppServer 2":{
-			// 		"time-stamps": [],
-			// 		"values": []
-			// 		}
-			// 	}
-			// }
+		},
 
-			return this.oResultSet;
+		processDataSet: function () {
+
+			this.init();
+
+			this.updateButton("Validating Input...", true);
+
+			this.setDataPayload();
+
+			this.setMeasuresIndex();
+
+			this.buildEmptyResultSet();
+
+			this.fillResultSet();
+
 		},
 
 		beginProcessing: function () {
 
-			let aChartData = this.processDataSet();
+			try {
+				this.processDataSet();
+				this.buildPPT();
+			} catch (e) {
+				this.updateButton("Generate Report", false);
+				this.updateInformationProvider(e);
+			}
 
-			// Data will look like this -
-			// {
-			// 	"UserLogins": {
-			//		"index": 7
-			// 		"AppServer 1":{
-			// 		"time-stamps": [],
-			// 		"values": []
-			// 		},
-			//		"AppServer 2":{
-			// 		"time-stamps": [],
-			// 		"values": []
-			// 		}
-			// 	}
-			// }
+		},
+
+		buildPPT: function () {
 
 			let pptx = new PptxGenJS();
 
-			let aAllMeasures = Object.keys(aChartData);
+			let aAllMeasures = Object.keys(this.oResultSet);
 
 			// Do a tweak here to show user info first -
 			//Logins and Sessions
@@ -205,7 +185,7 @@ function PPTGenerator() {
 
 			for (let i = 0; i < aAllMeasures.length; i++) {
 
-				let oSpecificInfo = aChartData[aAllMeasures[i]];
+				let oSpecificInfo = this.oResultSet[aAllMeasures[i]];
 
 				// Maybe we have something that isn't a measure? // TODO: Strengthen check
 				if (!oSpecificInfo.index) continue;
@@ -241,6 +221,35 @@ function PPTGenerator() {
 
 					//			Not adding index
 					if (oSpecificAppServerInfo.TimeStamps && oSpecificAppServerInfo.Values) {
+
+						// Check if the timestamps were in descending order
+						// This is hard to do when the dataset is being built but easy on post processing
+
+						// To check the timestamps we get the first and last timestamps first-
+
+						const sFirstTS = oSpecificAppServerInfo.TimeStamps[0],
+							sLastTS = oSpecificAppServerInfo.TimeStamps[oSpecificAppServerInfo.TimeStamps.length - 1];
+
+						if (sFirstTS.split(":").length !== 3 ||
+							sLastTS.split(":").length !== 3)
+							throw new Error("Calculated timestamps are invalid!");
+
+						const oFirstDate = new Date(),
+							oLastDate = new Date();
+
+						oFirstDate.setHours(sFirstTS.split(":")[0]);
+						oFirstDate.setMinutes(sFirstTS.split(":")[1]);
+						oFirstDate.setSeconds(sFirstTS.split(":")[2]);
+
+						oLastDate.setHours(sLastTS.split(":")[0]);
+						oLastDate.setMinutes(sLastTS.split(":")[1]);
+						oLastDate.setSeconds(sLastTS.split(":")[2]);
+
+						if (oFirstDate > oLastDate) {
+							oSpecificAppServerInfo.TimeStamps.reverse();
+							oSpecificAppServerInfo.Values.reverse();
+						}
+
 						aAppServerChartInfo.push({
 							name: sAppServerName,
 							labels: oSpecificAppServerInfo.TimeStamps,
@@ -274,22 +283,31 @@ function PPTGenerator() {
 				});
 			}
 
-			let oGenerateButton = document.querySelector("#reportGenerateButton");
+			this.updateButton("Generating file...", true);
 
-			oGenerateButton.disabled = true;
-			oGenerateButton.textContent = "Generating...";
-
+			var that = this;
 			pptx.writeFile('SDF SMON Report')
 				.then(function (fileName) {
-					oGenerateButton.disabled = false;
-					oGenerateButton.textContent = "Generate Report"
-
-					document.querySelector("#successMessageHolder").innerText = 'Saved! File Name: ' + fileName;
-
-					setTimeout(function () {
-						document.querySelector("#successMessageHolder").innerText = ""
-					}, 4000);
+					that.updateButton("Generate Report", false);
+					that.updateInformationProvider('Saved! File Name: ' + fileName, true);
 				});
+		},
+
+		updateButton: function (sText, bDisabled) {
+			let oGenerateButton = document.querySelector("#reportGenerateButton");
+			oGenerateButton.textContent = sText;
+			oGenerateButton.disabled = bDisabled;
+		},
+
+		updateInformationProvider: function (sInfo, bClear) {
+
+			document.querySelector("#successMessageHolder").innerText = sInfo;
+
+			if (bClear) {
+				setTimeout(function () {
+					document.querySelector("#successMessageHolder").innerText = ""
+				}, 4000);
+			}
 		},
 
 		getFriendlyText: function (sTitle) {
