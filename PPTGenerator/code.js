@@ -86,6 +86,9 @@ function PPTGenerator() {
 					}
 				}
 			}
+
+			if (this.iTimeIndex === 0 || this.iAppServerIndex === 0)
+				throw new Error("- Cannot find index for Time or App Server in DataSet -");
 		},
 
 		fillResultSet: function () {
@@ -95,6 +98,9 @@ function PPTGenerator() {
 			let aKnownMeasures = Object.keys(this.oResultSet);
 
 			let aCurrentLine;
+
+			if (this.iMeasuresIndex + 2 > this.aDataSet.length)
+				throw new Error("- No lines after the measures -");
 
 			for (let i = this.iMeasuresIndex + 2; i < this.aDataSet.length; i++) {
 
