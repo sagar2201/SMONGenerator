@@ -288,7 +288,7 @@ function PPTGenerator() {
 
 					setTimeout(function () {
 						document.querySelector("#successMessageHolder").innerText = ""
-					}, 5000);
+					}, 4000);
 				});
 		},
 
