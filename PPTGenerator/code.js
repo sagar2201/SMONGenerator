@@ -130,7 +130,8 @@ function PPTGenerator() {
 
 					sCurrentLineValue = aCurrentLine[oCurrentMeasure.index];
 
-					sCurrentLineValue = parseFloat(sCurrentLineValue.replace(",", ""));
+					// There are no decimals in the SDF SMON result
+					sCurrentLineValue = parseInt(sCurrentLineValue.replace(/,/g, "").replace(/\./g, ""));
 
 					if (isNaN(sCurrentLineValue)) {
 						debugger;
@@ -167,6 +168,7 @@ function PPTGenerator() {
 			} catch (e) {
 				this.updateButton("Generate Report", false);
 				this.updateInformationProvider(e);
+				throw e;
 			}
 
 		},
@@ -190,6 +192,8 @@ function PPTGenerator() {
 			}
 
 			for (let i = 0; i < aAllMeasures.length; i++) {
+
+				let iMinNumberInDataSet;
 
 				let oSpecificInfo = this.oResultSet[aAllMeasures[i]];
 
@@ -256,6 +260,11 @@ function PPTGenerator() {
 							oSpecificAppServerInfo.Values.reverse();
 						}
 
+						let iCurrentAppServerMinValue = Math.min(...oSpecificAppServerInfo.Values);
+
+						if (!iMinNumberInDataSet || iCurrentAppServerMinValue < iMinNumberInDataSet)
+							iMinNumberInDataSet = iCurrentAppServerMinValue;
+
 						aAppServerChartInfo.push({
 							name: sAppServerName,
 							labels: oSpecificAppServerInfo.TimeStamps,
@@ -265,12 +274,12 @@ function PPTGenerator() {
 					}
 				}
 
-				slide.addChart(pptx.ChartType.line, aAppServerChartInfo, {
+				var oChartSettings = {
 					x: 0.5,
 					y: 1,
 					w: 8,
 					h: 3,
-					valAxisMinVal: 0,
+					// valAxisMinVal: 0,
 					lineSize: 1,
 					lineDataSymbol: "none",
 					lineSmooth: true,
@@ -286,7 +295,15 @@ function PPTGenerator() {
 						style: 'dash',
 						size: 1
 					}
-				});
+				};
+
+				// If the minimum number in the chart is < 10 then the y axis shows negative numbers
+
+				// Prevent negative numbers by setting the min axis to 10
+				if (iMinNumberInDataSet < 10)
+					oChartSettings.valAxisMinVal = 0;
+
+				slide.addChart(pptx.ChartType.line, aAppServerChartInfo, oChartSettings);
 			}
 
 			this.updateButton("Generating file...", true);
@@ -371,6 +388,8 @@ function PPTGenerator() {
 				return "Number of logins";
 			case "Sessions":
 				return "Number of sessions";
+			case "Em global":
+				return "Extended Memory Global";
 			default:
 				return sTitle;
 			}
