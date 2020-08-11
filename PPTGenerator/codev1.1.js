@@ -38,10 +38,13 @@ function PPTGenerator() {
 			for (this.iMeasuresIndex = 0; this.iMeasuresIndex < this.aDataSet.length; this.iMeasuresIndex++) {
 				if (this.aDataSet[this.iMeasuresIndex].indexOf("AS Instance") !== -1)
 					break;
+
+				else if (this.aDataSet[this.iMeasuresIndex].indexOf("Server Name") !== -1)
+					break;
 			}
 
 			if (this.iMeasuresIndex === this.aDataSet.length)
-				throw new Error("- Invalid input; no AS Instance found in dataset -");
+				throw new Error("- Invalid input; no AS Instance or Server Name found in dataset -");
 
 		},
 
@@ -72,6 +75,9 @@ function PPTGenerator() {
 							this.iTimeIndex = i;
 
 						else if (sCurrentMeasure.toLowerCase() == "as instance" && this.iAppServerIndex === 0)
+							this.iAppServerIndex = i;
+
+						else if (sCurrentMeasure.toLowerCase() == "server name" && this.iAppServerIndex === 0)
 							this.iAppServerIndex = i;
 
 						else if (this.oResultSet[sCurrentMeasure]) {
@@ -110,6 +116,12 @@ function PPTGenerator() {
 				// Either a blank line or a line with -----------
 				if (aCurrentLine.length < 2)
 					continue;
+				
+				// Is this a line with Global Data?
+				if (aCurrentLine[this.iAppServerIndex].trim() === "Global Data") {
+					debugger;
+					continue;
+				}
 
 				// Now start a loop for all known measures
 				for (let j = 0; j < aKnownMeasures.length; j++) {
