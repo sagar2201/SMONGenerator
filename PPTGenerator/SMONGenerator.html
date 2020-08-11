@@ -1,43 +1,39 @@
 <!doctype html>
-
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-<script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.2.1/dist/pptxgen.bundle.js"></script>
-  <script type="text/javascript" src="./codev1.1.js"></script>
-  
-  <!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=UA-175059240-1"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'UA-175059240-1');
-</script>
-
-  <title>SDF SMON PPT Generator</title>
-</head>
-
-<body>
-<div style="padding: 10px">
- <textarea rows="30" id="dataSet" cols="100" placeholder="Paste SDF SMON data here...">
-</textarea>
-<div
-  <br><br>
-  <button id="reportGenerateButton" onclick="pptGenerator.beginProcessing()">Generate Report</button>
-  <br><br>
-  <div id="successMessageHolder">&nbsp;</div>
-  <script>
- 	pptGenerator = new PPTGenerator();  
-  </script>
-</div>
-<div style="float:right">v 1.0
-<div>
-<a href = "mailto:zulfiqar.tapia@sap.com?subject=I found a bug in the SDF Report Generator">
-Bugs?
-</div>
-</a>
-</div>
-</body>
+   <head>
+      <meta charset="utf-8">
+      <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.2.1/dist/pptxgen.bundle.js"></script>
+      <script type="text/javascript" src="./codev1.1.js"></script>
+      <!-- Global site tag (gtag.js) - Google Analytics -->
+      <script async src="https://www.googletagmanager.com/gtag/js?id=UA-175059240-1"></script>
+      <script>
+         window.dataLayer = window.dataLayer || [];
+         function gtag(){dataLayer.push(arguments);}
+         gtag('js', new Date());
+         
+         gtag('config', 'UA-175059240-1');
+      </script>
+      <title>SDF SMON PPT Generator</title>
+   </head>
+   <body>
+      <div style="padding: 10px">
+         <textarea rows="30" id="dataSet" cols="100" placeholder="Paste SDF SMON data here..."></textarea>
+         <div>
+            <br><br>
+            <button id="reportGenerateButton" onclick="pptGenerator.beginProcessing()">Generate Report</button>
+            <br><br>
+            <div id="successMessageHolder">&nbsp;</div>
+            <script>
+               pptGenerator = new PPTGenerator();  
+            </script>
+         </div>
+         <div style="float:right">v 1.1
+	         <div>
+	            <a href = "mailto:zulfiqar.tapia@sap.com?subject=I found a bug in the SDF Report Generator">
+	            Bugs?
+	            </a>
+	         </div>
+         </div>
+      </div>
+   </body>
 </html>
