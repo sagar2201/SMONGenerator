@@ -17,22 +17,24 @@
    </head>
    <body>
       <div style="padding: 10px">
+      	<h3>SDF MON PPT Generator</h3>
          <textarea rows="30" id="dataSet" cols="100" placeholder="Paste SDF SMON data here..."></textarea>
          <div>
             <br><br>
-            <button id="reportGenerateButton" onclick="pptGenerator.beginProcessing()">Generate Report</button>
-            <br><br>
-            <div id="successMessageHolder">&nbsp;</div>
-            <script>
-               pptGenerator = new PPTGenerator();  
-            </script>
-         </div>
-         <div style="float:right">v 1.1
+             <div style="float:right; text-align: right">v 1.1
 	         <div>
 	            <a href = "mailto:zulfiqar.tapia@sap.com?subject=I&nbsp;found&nbsp;a&nbsp;bug&nbsp;in&nbsp;the&nbsp;SDF&nbsp;Report&nbsp;Generator">
 	            Bugs?
 	            </a>
 	         </div>
+	         <div>Works best on Chrome</div>
+         </div>
+            <button id="reportGenerateButton" onclick="pptGenerator.beginProcessing()">Generate Report</button>
+            
+            <div style="padding-top: 10px; color:red" id="successMessageHolder">&nbsp;</div>
+            <script>
+               pptGenerator = new PPTGenerator();  
+            </script>
          </div>
       </div>
    </body>
