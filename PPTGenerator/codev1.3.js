@@ -36,10 +36,9 @@ function PPTGenerator() {
 
 		setMeasuresIndex: function () {
 			for (this.iMeasuresIndex = 0; this.iMeasuresIndex < this.aDataSet.length; this.iMeasuresIndex++) {
-				if (this.aDataSet[this.iMeasuresIndex].indexOf("AS Instance") !== -1)
-					break;
-
-				else if (this.aDataSet[this.iMeasuresIndex].indexOf("Server Name") !== -1)
+				if ((this.aDataSet[this.iMeasuresIndex].indexOf("AS Instance") !== -1) ||
+					(this.aDataSet[this.iMeasuresIndex].indexOf("Server Name") !== -1) ||
+					(this.aDataSet[this.iMeasuresIndex].indexOf("Act. WPs") !== -1))
 					break;
 			}
 
@@ -93,6 +92,10 @@ function PPTGenerator() {
 				}
 			}
 
+			// Just one app server?
+			if (this.iTimeIndex !== 0  && this.iAppServerIndex === 0)
+				this.iAppServerIndex = this.iTimeIndex;
+
 			if (this.iTimeIndex === 0 || this.iAppServerIndex === 0)
 				throw new Error("- Cannot find index for Time or App Server in DataSet -");
 		},
@@ -116,7 +119,7 @@ function PPTGenerator() {
 				// Either a blank line or a line with -----------
 				if (aCurrentLine.length < 2)
 					continue;
-				
+
 				// Is this a line with Global Data?
 				if (aCurrentLine[this.iAppServerIndex].trim() === "Global Data") {
 					debugger;
@@ -130,14 +133,15 @@ function PPTGenerator() {
 					// Get the JSON Object associated specifically with this measures -
 					let oCurrentMeasure = this.oResultSet[aKnownMeasures[j]];
 
+					let sServerName = this.iTimeIndex === this.iAppServerIndex ? "App Server" : aCurrentLine[this.iAppServerIndex];
 					// In that JSON Object is there already info about this app server?
-					if (!oCurrentMeasure[aCurrentLine[this.iAppServerIndex]])
-						oCurrentMeasure[aCurrentLine[this.iAppServerIndex]] = {
+					if (!oCurrentMeasure[sServerName])
+						oCurrentMeasure[sServerName] = {
 							"TimeStamps": [],
 							"Values": []
 						};
 
-					let oCurrentMeasureAppServer = oCurrentMeasure[aCurrentLine[this.iAppServerIndex]];
+					let oCurrentMeasureAppServer = oCurrentMeasure[sServerName];
 					oCurrentMeasureAppServer.TimeStamps.push(aCurrentLine[this.iTimeIndex]);
 
 					sCurrentLineValue = aCurrentLine[oCurrentMeasure.index];
