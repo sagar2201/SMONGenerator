@@ -18,12 +18,18 @@ function PPTGenerator() {
 			this.aDataSet = [];
 		},
 
+		getTextControlReference: function () {
+			return document.querySelector("#dataSet");
+		},
+		clear: function () {
+			this.getTextControlReference().value = '';
+		},
 		setDataPayload: function () {
 
 			// First step will be to get all the different parameters in the passed in dataset
 
 			// Get everything the user entered -
-			let sDataSet = document.querySelector("#dataSet").value;
+			let sDataSet = this.getTextControlReference().value;
 
 			// No input? Stop
 			if (sDataSet.trim() === "")
@@ -93,7 +99,7 @@ function PPTGenerator() {
 			}
 
 			// Just one app server?
-			if (this.iTimeIndex !== 0  && this.iAppServerIndex === 0)
+			if (this.iTimeIndex !== 0 && this.iAppServerIndex === 0)
 				this.iAppServerIndex = this.iTimeIndex;
 
 			if (this.iTimeIndex === 0 || this.iAppServerIndex === 0)
