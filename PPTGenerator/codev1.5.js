@@ -8,14 +8,17 @@ function PPTGenerator() {
 		iAppServerIndex: 0,
 		iMeasuresIndex: 0,
 		aDataSet: [],
+		createPlaceholder: true,
 
 		init: function () {
+			
 			this.oResultSet = {};
 			this.iDateIndex = 0;
 			this.iTimeIndex = 0;
 			this.iAppServerIndex = 0;
 			this.iMeasuresIndex = 0;
 			this.aDataSet = [];
+			this.bCreatePlaceHolder = document.querySelector("#placeHolderSwitch").checked;
 		},
 
 		getTextControlReference: function () {
@@ -167,9 +170,9 @@ function PPTGenerator() {
 		},
 
 		processDataSet: function () {
-
+			
 			this.init();
-
+				
 			this.updateButton("Validating Input...", true);
 
 			this.setDataPayload();
@@ -230,18 +233,20 @@ function PPTGenerator() {
 					fontSize: 24
 				});
 
-				slide.addText("--- Add Analysis Here ---", {
-					x: 0.5,
-					y: 4.25,
-					w: 8,
-					h: 0.5,
-					isTextBox: true,
-					line: {
-						pt: '2',
-						color: 'A9A9A9'
-					},
-					fontSize: 20
-				});
+				if (this.bCreatePlaceHolder) {
+					slide.addText("--- Add Analysis Here ---", {
+						x: 0.5,
+						y: 4.25,
+						w: 8,
+						h: 0.5,
+						isTextBox: true,
+						line: {
+							pt: '2',
+							color: 'A9A9A9'
+						},
+						fontSize: 20
+					});
+				}
 
 				let aAppServers = Object.keys(oSpecificInfo);
 
